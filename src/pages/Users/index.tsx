@@ -21,17 +21,12 @@ import { RiAddLine, RiPencilLine } from "react-icons/ri";
 import { Header } from "../../components/Header/indexHeader";
 import { Pagination } from "../../components/Pagination/indexPagination";
 import { Sidebar } from "../../components/Sidebar/indexSidebar";
-import { useQuery } from "react-query";
+import { useUsers } from "../../services/hooks/useUsers";
 
 export default function UsersList() {
-  const { data, isLoading, error } = useQuery("users", async () => {
-    const response = await fetch("http://localhost:3000/api/users");
-    const data = await response.json();
+  const { data, isLoading, isFetching, error, refetch } = useUsers()
 
-    return data;
-  });
-
-
+  
 
   const isWideVersion = useBreakpointValue({ base: false, lg: true });
 
@@ -44,6 +39,7 @@ export default function UsersList() {
           <Flex mb="8" justify="space-between" align="center">
             <Heading size="lg" fontWeight="normal">
               Usuários
+              {isFetching && !isLoading && <Spinner size="sm" color="gray.500" ml="4"/>}
             </Heading>
             <Link href="/Users/create" passHref>
               <Button
@@ -80,34 +76,42 @@ export default function UsersList() {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  <Tr>
-                    <Td px={["4", "4", "6"]}>
-                      <Checkbox colorScheme="pink"></Checkbox>
-                    </Td>
-                    <Td>
-                      <Box>
-                        <Text fontWeight="bold">Beatriz de Souza</Text>
-                        <Text fontSize="sm" color="gray.300">
-                          beatriz@gmail.com
-                        </Text>
-                      </Box>
-                    </Td>
-                    {isWideVersion && <Td> 22 de março, 2022</Td>}
-                    <Td>
-                      <Button
-                        as="a"
-                        size="sm"
-                        fontSize="sm"
-                        colorScheme="orange"
-                        leftIcon={<Icon as={RiPencilLine} fontSize="16" />}
-                      >
-                        {isWideVersion ? "Editar" : ""}
-                      </Button>
-                    </Td>
-                  </Tr>
+                  {data.map((user) => {
+                    return (
+                      
+                        <Tr key={user.id}>
+                          <Td px={["4", "4", "6"]}>
+                            <Checkbox colorScheme="pink"></Checkbox>
+                          </Td>
+                          <Td>
+                            <Box>
+                              <Text fontWeight="bold">{user.name}</Text>
+                              <Text fontSize="sm" color="gray.300">
+                                {user.email}
+                              </Text>
+                            </Box>
+                          </Td>
+                          {isWideVersion && <Td> {user.createdAt }</Td>}
+                          <Td>
+                            <Button
+                              as="a"
+                              size="sm"
+                              fontSize="sm"
+                              colorScheme="orange"
+                              leftIcon={
+                                <Icon as={RiPencilLine} fontSize="16" />
+                              }
+                            >
+                              {isWideVersion ? "Editar" : ""}
+                            </Button>
+                          </Td>
+                        </Tr>
+                      
+                    );
+                  })}
                 </Tbody>
               </Table>
-              <Pagination />
+              <Pagination totalCountOfRegisters={200} currentPage={5} onPageChange={()=>{}}/>
             </>
           )}
         </Box>
